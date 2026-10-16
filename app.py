@@ -92,7 +92,8 @@ async def concluir_tarefa(id: int):
 
             resp = requests.post("http://localhost:8000/notificar?id={id}&titulo={titulo}")
 
-            print(resp.json())
+            print(resp)
+            return {"mensagem": "Tarefa atualizada!"}
 
     return {"mensagem": "Tarefa não existe"}
 
