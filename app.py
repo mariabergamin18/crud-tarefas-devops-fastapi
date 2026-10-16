@@ -90,7 +90,7 @@ async def concluir_tarefa(id: int):
             tarefa['concluida'] = True
             tarefa['concluida_em'] = datetime.now()
 
-            resp = requests.post("http://localhost:8002/notificar?id={id}&titulo={titulo}")
+            resp = requests.post("http://localhost:8000/notificar?id={id}&titulo={titulo}")
 
             print(resp.json())
 
