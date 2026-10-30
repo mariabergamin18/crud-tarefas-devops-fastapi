@@ -58,9 +58,6 @@ async def post_tarefa(titulo: str, descricao: str):
 @APP.get("/tarefas/{id_tarefa}")
 async def tarefa_especifica(id_tarefa: int):
     """ Descrição """
-    # 1. Selecionar a tarefa de ID recebido como parâmetro
-    # 2. Retornar todos os dados da tarefa
-    # 3. Caso a tarefa não exista, você tem que mostrar que a tarefa não existe
 
     for tarefa in TAREFAS:
         if id_tarefa == int(tarefa["id"]):
@@ -72,10 +69,6 @@ async def tarefa_especifica(id_tarefa: int):
 @APP.put("/tarefas/{id_tarefa}")
 async def concluir_tarefa(id_tarefa: int):
     """ Descrição """
-    # 1. Selecionar a tarefa de ID recebido como parâmetro
-    # 2. Marcar a tarefa como concluída
-    # 3. Você deve armazenar o horário de conclusão da tarefa
-    # 4. Caso a tarefa não exista, você tem que mostrar que a tarefa não existe
 
     for tarefa in TAREFAS:
         if id_tarefa == int(tarefa['id']) and tarefa['concluida'] is False:
@@ -99,10 +92,6 @@ async def concluir_tarefa(id_tarefa: int):
 @APP.delete("/tarefas/{id_tarefa}")
 async def apagar_tarefa(id_tarefa: int):
     """ Descrição """
-    # 1. Selecionar a tarefa de ID recebido como parâmetro
-    # 2. Remover tarefa da lista de tarefas
-    # 3. Caso a tarefa não exista, você tem que mostrar que a tarefa não existe
-
     indice = 0
     for tarefa in TAREFAS:
         if id_tarefa == int(tarefa['id']):
@@ -117,3 +106,8 @@ async def apagar_tarefa(id_tarefa: int):
 async def index():
     """ Descrição """
     return {"mensagem": "Olá, mundo!"}
+
+@APP.get("/autor")
+async def mostrar_autor():
+    """ Mostra nome do autor """
+    return {"mensagem": "maria eduarda bergamin jorge"}
