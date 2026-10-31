@@ -1,12 +1,12 @@
-""" DevOps """
+"""Aplicação para o módulo de extensão DevOps"""
 
 from datetime import datetime, timezone
 from typing import Annotated, List
 import os
+import sys
 
 from fastapi import FastAPI, Depends
 from sqlmodel import SQLModel, Session, create_engine, select
-from requests.exceptions import ConnectionError as RequestConnectionError
 
 from .modelo import Tarefa
 
@@ -17,43 +17,49 @@ DATABASE = os.environ.get("DATABASE")
 
 if DATABASE_USERNAME is None:
     print("DATABASE_USERNAME está faltando")
-    exit(1)
+    sys.exit(1)
 
 if DATABASE_PASSWORD is None:
     print("DATABASE_PASSWORD está faltando")
-    exit(1)
+    sys.exit(1)
 
 if DATABASE_ADDRESS is None:
     print("DATABASE_ADDRESS está faltando")
-    exit(1)
+    sys.exit(1)
 
 if DATABASE is None:
     print("DATABASE está faltando")
-    exit(1)
+    sys.exit(1)
 
-ENGINE = create_engine(f"mysql+pymysql://{DATABASE_USERNAME}:{DATABASE_PASSWORD}@{DATABASE_ADDRESS}:3306/{DATABASE}")
+ENGINE = create_engine(
+    f"mysql+pymysql://{DATABASE_USERNAME}:{DATABASE_PASSWORD}@{DATABASE_ADDRESS}:3306/{DATABASE}"
+)
+
 
 def criar_sessao():
-    """ sessão """
+    """ Função utilitária para criar sessão no banco de dados """
     with Session(ENGINE) as s:
         yield s
 
+
 SESSAO = Annotated[Session, Depends(criar_sessao)]
 
-async def inicializacao(api: FastAPI):
-    """Engine = banco de dados, inicializa tabela"""
+
+async def inicializacao(_: FastAPI):
+    """ Função para incialização da API e do banco de dados """
     SQLModel.metadata.create_all(ENGINE)
     yield
+
 
 APP = FastAPI(lifespan=inicializacao)
 TAREFAS = []
 
+
 # GET /tarefas: Lista todas as tarefas (somente id e titulo)
 @APP.get("/tarefas")
 async def tarefas(sessao: SESSAO) -> List[Tarefa]:
-    """ Descrição """
+    """Rota para listar as tarefas."""
 
-    #retorna sequencia das tarefas
     lista_tarefas = sessao.exec(select(Tarefa).offset(0)).all()
 
     return lista_tarefas
@@ -62,12 +68,13 @@ async def tarefas(sessao: SESSAO) -> List[Tarefa]:
 # POST /tarefas: Cria tarefa
 @APP.post("/tarefas", status_code=201)
 async def post_tarefa(sessao: SESSAO, titulo: str, descricao: str = None):
-    """ Descrição """
+    """Rota para criar uma tarefa."""
+    data = datetime.now().astimezone(timezone.utc).replace(microsecond=0)
     tarefa_nova = Tarefa(
-        titulo=titulo, 
-        descricao=descricao, 
-        data_criacao=datetime.now().astimezone(timezone.utc),
-        )
+        titulo=titulo,
+        descricao=descricao,
+        data_criacao=data,
+    )
 
     sessao.add(tarefa_nova)
     sessao.commit()
@@ -75,10 +82,11 @@ async def post_tarefa(sessao: SESSAO, titulo: str, descricao: str = None):
 
     return {"mensagem": "OK"}
 
+
 # GET /tarefas/{id_tarefa}: Visualizar tarefa específica
 @APP.get("/tarefas/{id_tarefa}")
 async def tarefa_especifica(sessao: SESSAO, id_tarefa: int) -> Tarefa:
-    """ Descrição """
+    """Rota para visualizar uma tarefa específica"""
     # select * from tarefas where id == id_tarefa
     regra = select(Tarefa).where(Tarefa.id == id_tarefa)
     resultado = sessao.exec(regra).all()
@@ -88,10 +96,16 @@ async def tarefa_especifica(sessao: SESSAO, id_tarefa: int) -> Tarefa:
 
     return {"mensagem": "Tarefa não existe"}
 
+
 # PUT /tarefas/{id}: Atualiza tarefa específica
 @APP.put("/tarefas/{id_tarefa}")
 async def concluir_tarefa(sessao: SESSAO, id_tarefa: int):
-    """ Descrição """
+    """Rota para concluir uma tarefa."""
+
+    # Atualizar a rota para suportar o SQLModel/Conexão com BD
+    # Usar select para filtrar as tarefas com base no ID e se estiver concluída
+    # Atualizar usando sessao.add, sessao.commit, sessao.refresh
+
     regra = select(Tarefa).where(Tarefa.id == id_tarefa)
     resultado = sessao.exec(regra).all()
 
@@ -108,7 +122,7 @@ async def concluir_tarefa(sessao: SESSAO, id_tarefa: int):
     sessao.refresh(resultado[0])
 
     return {"mensagem": "Tarefa atualizada"}
-       
+
 
 # DELETE /tarefas/{id_tarefa}: Exclui tarefa
 @APP.delete("/tarefas/{id_tarefa}")
@@ -117,9 +131,9 @@ async def apagar_tarefa(sessao: SESSAO, id_tarefa: int):
 
     regra = select(Tarefa).where(Tarefa.id == id_tarefa)
     resultado = sessao.exec(regra).all()
-    
+
     if not resultado:
-        return {"mensagem": "Tarefa não existe"}    
+        return {"mensagem": "Tarefa não existe"}
 
     tarefa = resultado[0]
 
@@ -128,12 +142,24 @@ async def apagar_tarefa(sessao: SESSAO, id_tarefa: int):
 
     return {"mensagem": "Tarefa removida"}
 
+
 @APP.get("/")
 async def index():
-    """ Descrição """
+    """Rota raíz."""
     return {"mensagem": "Olá, mundo!"}
 
+
+# 1. Implementar uma rota chamada "/autor" que retorna
+# um dicionário no formato {"mensagem": SEU NOME COMPLETO}
 @APP.get("/autor")
-async def mostrar_autor():
-    """ Mostra nome do autor """
-    return {"mensagem": "maria eduarda bergamin jorge"}
+async def autor():
+    """Rota para retornar o autor da aplicação"""
+    return {"mensagem": "Pedro Rocha Horchulhack"}
+
+
+# 2. Criar um teste unitário para verificar se a rota
+# está produzindo o resultado esperado
+
+# 3. Verificar se o código está no padrão do PyLint
+
+# 4. Enviar o código para o repositório (git push)
