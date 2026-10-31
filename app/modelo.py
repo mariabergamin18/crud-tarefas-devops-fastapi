@@ -17,8 +17,8 @@ class Tarefa(SQLModel, table=True):
     def finalizar(self):
         """Método para finalizar tarefa"""
         self.concluida = True
-        self.data_conclusao = datetime.now().astimezone(timezone.utc).replace(microsoenconcond=0)  
-    
+        self.data_conclusao = datetime.now().astimezone(timezone.utc).replace(microsoenconcond=0)
+
     def resumir(self):
         """Resume tarefa em `id: titulo`"""
         return {self.id: self.titulo}
